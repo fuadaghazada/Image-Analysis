@@ -1,22 +1,18 @@
 from pprint import pprint
 import numpy as np
 
-from operations import dilation, erosion, threshold
-from file import load_img_2D, save_img_from_array
+from mylib.file import load_img_2D, save_img_from_array
+from mylib.morph_operations import dilation, erosion
+from mylib.threshold import adaptive_threshold
 
 ######## QUESTION 2 ########
 src_img = load_img_2D('sonnet.png')
 
+thr_img = adaptive_threshold(src_img, (50, 70), 1)
 
-strc_el = np.array([(255, 255, 255),
-                    (255, 255, 255),
-                    (255, 255, 255)])
+strc_el = np.ones((2, 2)).astype(np.uint8) * 255
 
+out_img = erosion(thr_img, strc_el)
+out_img = dilation(out_img, strc_el)
 
-
-threshold(src_img, 180)
-# out_img = erosion(src_img, strc_el)
-# out_img = dilation(out_img, strc_el)
-
-
-save_img_from_array(src_img, out_name = 'sonnet_out.png')
+save_img_from_array(out_img, out_name = 'sonnet_out.png')

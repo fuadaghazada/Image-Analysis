@@ -1,6 +1,5 @@
 '''
-    Implementation of 2 morphological operations: dilation and erosion +
-    Implementation of thresholding
+    Implementation of 2 morphological operations: dilation and erosion
     First Notation has been used for implementing these morphological operations.
 
     @author: Fuad Aghazada
@@ -21,7 +20,7 @@ def dilation(source_image, struct_el):
     # Main loop for iterating source image
     for i in range(0, len(source_image)):
         for j in range(0, len(source_image[i])):
-            if check_notation(i, j, source_image, struct_el, 1) is True:
+            if check_notation(i, j, source_image, struct_el, 0) is True:
                 out_img[i, j] = 255
 
     return out_img
@@ -37,23 +36,10 @@ def erosion(source_image, struct_el):
     # Main loop for iterating source image
     for i in range(0, len(source_image)):
         for j in range(0, len(source_image[i])):
-            if check_notation(i, j, source_image, struct_el, 0) is True:
+            if check_notation(i, j, source_image, struct_el, 1) is True:
                 out_img[i, j] = 255
 
     return out_img
-
-
-'''
-    Thresholding with the given value
-'''
-def threshold(img, value):
-
-    img.setflags(write = 1)     # Setting write to 1
-
-    img[img > value] = 255
-    img[img <= value] = 0
-
-    img.setflags(write = 0)     # Setting write back to 0
 
 
 '''
@@ -95,16 +81,16 @@ def check_notation(i, j, source_image, struct_el, type = 0):
     result = False
 
     if type == 0:
-        # Check commonality by set intersection
-        a = set(sliced_part.flatten())
-        b = set(struct_el.flatten())
-
-        result = len(b.intersection(a)) >= 1
-    else:
         # Check commonality by list intersection
         a = list(sliced_part.flatten())
         b = list(struct_el.flatten())
 
         result = (a == b)
+    else:
+        # Check commonality by set intersection
+        a = set(sliced_part.flatten())
+        b = set(struct_el.flatten())
+
+        result = len(b.intersection(a)) >= 1
 
     return result
