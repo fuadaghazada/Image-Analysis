@@ -35,8 +35,7 @@ def threshold(img, value = None):
 '''
 def adaptive_threshold(source_image, neighbours = (3, 3), mode = 0):
 
-    h_s = neighbours[0]
-    w_s = neighbours[1]
+    (h_s, w_s) = neighbours
 
     # Vertical Indices
     i1 = int((h_s - 1) / 2)

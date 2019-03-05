@@ -15,4 +15,5 @@ strc_el = np.ones((2, 2)).astype(np.uint8) * 255
 out_img = erosion(thr_img, strc_el)
 out_img = dilation(out_img, strc_el)
 
+# Output
 save_img_from_array(out_img, out_name = 'sonnet_out.png')

@@ -51,10 +51,8 @@ def erosion(source_image, struct_el):
 '''
 def check_notation(i, j, source_image, struct_el, type = 0):
 
-    h_s = struct_el.shape[0]    # Height of structuring element
-    w_s = struct_el.shape[1]    # Width of structuring element
+    (h_s, w_s) = struct_el.shape    # Dimension of structuring
 
-    # Horizontal starting index
     a1 = int(j - (w_s - 1) / 2)
     if a1 < 0:
         a1 = 0
