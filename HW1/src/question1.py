@@ -6,7 +6,7 @@ from mylib.threshold import threshold
 from mylib.morph_operations import dilation, erosion
 
 ######## TEST ########
-src_img = load_img_2D('test2.png')
+src_img = load_img_2D('test4.png')
 threshold(src_img, 100)
 
 struct_el = np.ones((3, 3)).astype(np.uint8) * 255
