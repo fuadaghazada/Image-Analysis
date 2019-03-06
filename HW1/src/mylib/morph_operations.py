@@ -17,11 +17,14 @@ def dilation(source_image, struct_el):
 
     out_img = np.zeros(source_image.shape).astype(np.uint8)
 
+    (x, y) = struct_el.shape
+    s_origin = struct_el[int(x / 2), int(y / 2)]
+
     # Main loop for iterating source image
     for i in range(0, len(source_image)):
         for j in range(0, len(source_image[i])):
             if check_notation(i, j, source_image, struct_el, 0) is True:
-                out_img[i, j] = 255
+                out_img[i, j] = s_origin
 
     return out_img
 
@@ -33,11 +36,14 @@ def erosion(source_image, struct_el):
 
     out_img = np.zeros(source_image.shape).astype(np.uint8)
 
+    (x, y) = struct_el.shape
+    s_origin = struct_el[int(x / 2), int(y / 2)]
+
     # Main loop for iterating source image
     for i in range(0, len(source_image)):
         for j in range(0, len(source_image[i])):
             if check_notation(i, j, source_image, struct_el, 1) is True:
-                out_img[i, j] = 255
+                out_img[i, j] = s_origin
 
     return out_img
 
@@ -79,16 +85,16 @@ def check_notation(i, j, source_image, struct_el, type = 0):
     result = False
 
     if type == 0:
+        # Check commonality by set intersection
+        a = set(sliced_part.flatten())
+        b = set(struct_el.flatten())
+
+        result = len(a.intersection(b)) >= 1
+    else:
         # Check commonality by list intersection
         a = list(sliced_part.flatten())
         b = list(struct_el.flatten())
 
         result = (a == b)
-    else:
-        # Check commonality by set intersection
-        a = set(sliced_part.flatten())
-        b = set(struct_el.flatten())
-
-        result = len(b.intersection(a)) >= 1
 
     return result
