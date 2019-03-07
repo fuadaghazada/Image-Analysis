@@ -7,6 +7,7 @@
 '''
 
 import numpy as np
+from pprint import pprint
 
 '''
     Thresholding with the given value
@@ -29,20 +30,26 @@ def threshold(img, value = None):
 '''
     Adaptive thresholding
 
+    source_image:
+        input image
+    neighbours:
+        local area of pixel for taking mean or median
+    C:
+        constant to be substracted from threshold
     mode:
         0 - for mean
         1 - for median
 '''
-def adaptive_threshold(source_image, neighbours = (3, 3), mode = 0):
+def adaptive_threshold(source_image, neighbours = (3, 3), C = 3, mode = 0):
 
     (h_s, w_s) = neighbours
 
     # Vertical Indices
-    i1 = int((h_s - 1) / 2)
+    i1 = int((h_s) / 2)
     i2 = int(source_image.shape[0] - 1 - i1)
 
     # Horizontal Indices
-    j1 = int((w_s - 1) / 2)
+    j1 = int((w_s) / 2)
     j2 = int(source_image.shape[1] - 1 - j1)
 
     # Output image
@@ -55,6 +62,8 @@ def adaptive_threshold(source_image, neighbours = (3, 3), mode = 0):
                 value = np.mean(source_image[i - i1: i + i1 + 1, j - j1: j + j1 + 1].flatten())
             else:
                 value = np.median(source_image[i - i1: i + i1 + 1, j - j1: j + j1 + 1].flatten())
+
+            value -= C  # Constant
 
             if source_image[i, j] >= value:
                 out_img[i, j] = 255
