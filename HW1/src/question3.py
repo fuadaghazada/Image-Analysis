@@ -13,8 +13,6 @@ def question3_test():
 
     src_img = load_img_2D('test0.png')
 
-    threshold(src_img, 100)
-
     # Sobel operator
     filter = np.array([(-1, -2, -1),
                        ( 0,  0,  0),
