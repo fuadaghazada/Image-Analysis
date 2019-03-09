@@ -11,17 +11,25 @@ from other.loading import execute
 
 def question3_test():
 
-    src_img = load_img_2D('test0.png')
+    src_img = load_img_2D('test5.png')
 
     # Sobel operator
-    filter = np.array([(-1, -2, -1),
+    filter1 = np.array([(-1, -2, -1),
                        ( 0,  0,  0),
                        ( 1,  2,  1)
     ])
-    conv_img = convole(src_img, filter)
+
+    filter2 = np.array([(-1, 0, 1),
+                       (-2, 0, 2),
+                       (-1, 0, 1)
+    ])
+
+    out_img1 = convole(src_img, filter1)
+    out_img2 = convole(src_img, filter2)
 
     # Output
-    save_img_from_array(conv_img, out_name = 'conv_out_img.png')
+    save_img_from_array(out_img1, out_name = 'conv_out_img1.png')
+    save_img_from_array(out_img2, out_name = 'conv_out_img2.png')
 
 
 # Executing test
