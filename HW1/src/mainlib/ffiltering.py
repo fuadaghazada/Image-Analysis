@@ -29,8 +29,8 @@ def gaussian_filter(source_image, sigma = 0.2):
     fft_src_img = np.fft.fft2(source_image)
     fft_filter_func = np.fft.fft2(g_func)
 
-    out = np.multiply(fft_src_img, fft_filter_func)
-    out = np.fft.ifft2(out)
+    fft_out = np.multiply(fft_src_img, fft_filter_func)
+    out = np.fft.ifft2(fft_out)
     out = out.real
 
-    return out
+    return np.log(fft_src_img).real, g_func, np.log(fft_filter_func).real, out, np.log(fft_out).real
