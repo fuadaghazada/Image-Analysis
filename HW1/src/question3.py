@@ -28,8 +28,8 @@ def question3_test():
     out_img2 = convole(src_img, filter2)
 
     # Output
-    save_img_from_array(out_img1, out_name = 'conv_out_img1.png')
-    save_img_from_array(out_img2, out_name = 'conv_out_img2.png')
+    out_img1.save('../out/conv_out_img1.png')
+    out_img2.save('../out/conv_out_img2.png')
 
 
 # Executing test
