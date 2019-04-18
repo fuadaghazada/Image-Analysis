@@ -33,4 +33,4 @@ def gaussian_filter(source_image, sigma = 0.2):
     out = np.fft.ifft2(fft_out)
     out = out.real
 
-    return np.log(fft_src_img).real, g_func, np.log(fft_filter_func).real, out, np.log(fft_out).real
+    return np.log(fft_src_img).real, np.log(g_func), np.log(fft_filter_func).real, out, np.log(fft_out).real
