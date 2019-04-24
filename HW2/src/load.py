@@ -16,7 +16,7 @@ def load_images(filename, scale = 2):
     files = []
 
     try:
-        with open(ROOT + '/' + filename, 'r') as file:
+        with open(ROOT + '/txt/' + filename, 'r') as file:
             for line in file:
                 files.append(line.replace('\n', ''))
 

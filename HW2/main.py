@@ -16,7 +16,8 @@ print("--------------------------------")
 print("----Image Stitching Software----")
 print("--------------------------------")
 
-print("Note: Please put your images to '/data' directory and have a .txt file containing name of the images in it\n\n")
+print("Notes: \n--Please put your txt file into '/txt' directory")
+print("--Please put your images into '/data' directory and have a .txt file containing name of the images in it\n\n")
 
 print("Please enter the name of txt file (with file extension): ", end='')
 
