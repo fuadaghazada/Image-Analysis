@@ -22,7 +22,7 @@ def calc_eculidean_distance(desc1, desc2):
 	@param: desc2 - descriptor of the second image
 	@return: matches - matching indices for matching points
 '''
-def match(desc1, desc2, threshold):
+def match(desc1, desc2, threshold = 100):
 
 	print("Computing matching keypoints...")
 
