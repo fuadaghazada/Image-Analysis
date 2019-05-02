@@ -33,16 +33,29 @@ if status is False:
 print("\n\n")
 print("Please select a descriptor: (Enter number)")
 print("0. SIFT descriptor")
-print("1. Raw-pixel based descriptor")
+print("1. Raw-pixel based descriptor (not working properly)")
 
-choice = str(input())
+desc = str(input())
 
-if choice != "0" and choice != "1":
+if desc != "0" and desc != "1":
+    print("Invalid choice! Please choose one of the choices with number")
+    sys.exit()
+
+# --------------------------------------------------------------------------------------------------
+
+print("\n\n")
+print("Please select a averaging type in blending: (Enter number)")
+print("0. Mean")
+print("1. Weighted average")
+
+blend = str(input())
+
+if blend != "0" and blend != "1":
     print("Invalid choice! Please choose one of the choices with number")
     sys.exit()
 
 print("\nPlease wait until the stitching process is finished. It may take a while...\n\n")
-res = stich_images(images, int(choice))
+res = stich_images(images, int(desc), int(blend))
 
 # --------------------------------------------------------------------------------------------------
 

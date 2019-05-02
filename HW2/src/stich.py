@@ -15,7 +15,7 @@ from src.detect_describe import detect_describe_local_features, describe_raw_pix
     @param: matches - matching indexes for keypoints
     @return: img - resgitered/aligned image
 '''
-def register_images(image1, image2, keypoints1, keypoints2, matches):
+def register_images(image1, image2, keypoints1, keypoints2, matches, blend_type = 0):
 
     # Matching points of two images
     m_kps0, m_kps1 = get_matching_points(keypoints1, keypoints2, matches)
@@ -26,13 +26,45 @@ def register_images(image1, image2, keypoints1, keypoints2, matches):
     # Creating result image
     img = cv2.warpPerspective(image1, homography, (image1.shape[1] + image2.shape[1], image1.shape[0]))
 
-    # Second image in whole area (image1.shape[1] + image2.shape[1])
-    temp = np.zeros((img.shape), dtype = 'uint8')
-    temp[0:image2.shape[0], 0:image2.shape[1]] = image2
+    # ---------------------------------------
+    img = blend(img, image1, image2, blend_type)
+
+    return img
+
+'''
+    Blending the overlapping area of the images
+
+    @param: img - the affined version for image1
+    @param: image1 - the first image
+    @param: image2 - the second image
+    @return: result image
+'''
+def blend(img, image1, image2, blend_type):
+    # BLENDING
+    # Finding Overlap
+    x1, y1, x2, y2 = find_overlap(img, image2)
+
+    d = x2 - x1
+    im1 = image1[:, 0:d]
+    im2 = image2[:, x1:x2]
 
     # ---------------------------------------
     # Adding second image to the result
     img[0:image2.shape[0], 0:image2.shape[1]] = image2
+
+    # Averaging with equal weights and unequal weights
+    if blend_type == 0:
+        avg = im1 * 0.5 + im2 * 0.5
+    else:
+        i = 0
+        inc = 1
+        avg = np.zeros((im1.shape))
+        while i < d:
+            avg[:, i] = im1[:, i] * (1 - inc) + im2[:, i] * inc
+            inc -= (1 / d)
+            i += 1
+
+    img[y1:y2, x1:x2] = avg
 
     return img
 
@@ -43,23 +75,25 @@ def register_images(image1, image2, keypoints1, keypoints2, matches):
     @param: img2 -  the second image
 '''
 def find_overlap(img, img2):
-    # Bitwise AND
-    overlap = cv2.bitwise_and(img, img2)
+    L = len(img)
+    x1_up = 0
+    for i in range(0, L):
+        if img[20, i] != 0:
+            x1_up = i
+            break
+        img[0, i] = 255
 
-    # Finding location of overlap in the image
-    gray = np.copy(overlap)
-    _, thresh = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
+    x1_down = 0
+    for i in range(0, L):
+        if img[img.shape[0] - 20, i] != 0:
+            x1_down = i
+            break
+        img[img.shape[0] - 1, i] = 255
 
-    x1s, x2s = [], []
-    for thr in thresh:
-        thr = list(thr)
-        x1s.append(thr.index(next(filter(lambda x: x!=0, thr))))
-        x2s.append(thr[::-1].index(next(filter(lambda x: x!=0, thr))))
-
-    x1 = min(x1s)
-    x2 = min(x2s)
+    x1 = min(x1_up, x1_down)
+    x2 = img2.shape[1]
     y1 = 0
-    y2 = len(thresh) - 1
+    y2 = img.shape[0]
 
     return x1, y1, x2, y2
 
@@ -103,10 +137,11 @@ def get_features_of_two_images(image1, image2, desc_type = 0):
 
     @param: image1 - the first image
     @param: image2 - the second image
-    @threshold: threshold - for matching distance
+    @param: desc_type = description type
+    @param: blend_type = blend type
     @return: result, image - result image after stiching and image with matching lines
 '''
-def stich_two_images(image1, image2, desc_type):
+def stich_two_images(image1, image2, desc_type, blend_type):
 
     # Features (Keypoints and Descriptors) & matches
     features = get_features_of_two_images(image1, image2, desc_type)
@@ -124,7 +159,7 @@ def stich_two_images(image1, image2, desc_type):
 
     # Image with matching lines and result image
     image = draw_matches(image1, image2, keypoints1, keypoints2, matches)
-    result = register_images(image1, image2, keypoints1, keypoints2, matches)
+    result = register_images(image1, image2, keypoints1, keypoints2, matches, blend_type)
 
     return result, image
 
@@ -137,7 +172,7 @@ def stich_two_images(image1, image2, desc_type):
     @param: dir: 1 if the images go left / 0 if right
     @return: result - stiched images
 '''
-def stich_images(images, desc_type = 0):
+def stich_images(images, desc_type = 0, blend_type = 0):
 
     # Determining the direction of panorama
     dir = get_direction(images)
@@ -153,7 +188,7 @@ def stich_images(images, desc_type = 0):
     result = images[0]
 
     for i in range(1, len(images)):
-        result, image = stich_two_images(result, images[i], desc_type)
+        result, image = stich_two_images(result, images[i], desc_type, blend_type)
 
     return result
 

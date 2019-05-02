@@ -33,13 +33,13 @@ def match(desc1, desc2, threshold = 100):
 	num_keypoints1 = desc1.shape[0]
 	num_keypoints2 = desc2.shape[0]
 
+	# threshold = (num_keypoints1 + num_keypoints2) / 11
+
 	# Calculating the distances between keypoints of two images
 	distances = calc_eculidean_distance(desc1, desc2)
 
-	for i in range(num_keypoints1):
-		for j in range(num_keypoints2):
-			if distances[i][j] < threshold:
-				matches.append((i, j))
+	threshold_indices = np.asarray(np.where(distances < threshold)).T
+	matches = [tuple(index) for index in threshold_indices]
 
 	print("Matching points computed!\n--")
 
