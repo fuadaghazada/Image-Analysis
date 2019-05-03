@@ -22,7 +22,7 @@ warnings.filterwarnings('ignore')
 '''
 
 
-def slic(image, k, m=10):
+def slic(image, k, m=10, num_iterations=10):
 	# Properties
 	h, w, _ = image.shape			# Image dimension
 	N = w * h						# Number pixels in image
@@ -32,19 +32,50 @@ def slic(image, k, m=10):
 	image_lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
 
 	# Initializing cluster centers in lowest gradient positions (3x3)
-	cluster_centers = init_super_pixels(image_lab, S)
+	cluster_centers, cluster_counts = init_super_pixels(image_lab, S)
 
 	# Initializing labels and distances
 	labels = np.ones((h, w), dtype=np.uint8) * (-1)
 	distances = np.ones((h, w)) * math.inf
 
-	# -- ASSIGNMENT -- (Part 1)
-
 	# TODO: Repeat until E <= threshold
-	for i in range(10):
+	for k in range(num_iterations):
+		# -- ASSIGNMENT --
+
+		print("ITERATION:", (k + 1))
+		print("\n\tCalculating distances and setting labels...")
+
 		# Iterating over the cluster centers
 		for c, center in enumerate(cluster_centers):
+			# Distances and labels are updated
 			distances, labels = calc_distances(center, image_lab, distances, labels, S, m, w, h, c)
+
+		print("\tDistances are calculated and labels are set!")
+		print("\t----")
+		print("\tUpdating the cluster centers...")
+
+		# -- UPDATE --
+
+		print("\t\tClearing the old clusters...")
+
+		# Resetting cluster values
+		reset_clusters(cluster_centers, cluster_counts)
+
+		print("\t\tOld clusters are cleared!")
+		print("\t\t----")
+		print("\t\tRecomputing the new clusters...")
+
+		# Recomputing
+		update_clusters(image_lab, cluster_centers, cluster_counts, labels, w, h)
+
+		print("\t\tNew clusters have been calculated!")
+		print("\t\t----")
+		print("\t\tNormalizing the values of computed clusters...")
+
+		normalize_clusters(cluster_centers, cluster_counts)
+
+		print("\t\tValues of computed clusters have been normalized!")
+		print("\n********************\n")
 
 	return labels
 
@@ -69,11 +100,11 @@ def slic(image, k, m=10):
 def calc_distances(center, image_lab, distances, labels, S, m, w, h, c):
 	l, a, b, x, y = center
 
-	x1 = x - S if x - S > 0 else 0
-	x2 = x + S if x + S <= w else w
+	x1 = int(x - S) if x - S > 0 else 0
+	x2 = int(x + S) if x + S <= w else w
 
-	y1 = y - S if y - S > 0 else 0
-	y2 = y + S if y + S <= h else 0
+	y1 = int(y - S) if y - S > 0 else 0
+	y2 = int(y + S) if y + S <= h else 0
 
 	# --- CALCULATIONS using loops (slow) ---
 
@@ -91,7 +122,7 @@ def calc_distances(center, image_lab, distances, labels, S, m, w, h, c):
 			distance = math.sqrt(d_lab ** 2 + ((d_pix * m) / S) ** 2)
 
 			if distance < distances[j, i]:
-				distances[j, l] = distance
+				distances[j, i] = distance
 				labels[j, i] = c
 	'''
 
@@ -128,6 +159,72 @@ def calc_distances(center, image_lab, distances, labels, S, m, w, h, c):
 
 
 '''
+	Updating the cluster values 
+	
+	:param image_lab - input image in LAB color space
+	:param cluster_centers - values of [l, a, b, x, y] of clusters
+	:param cluster_counts - a matrix keeping the number of clusters for each
+	:param labels - labels for each pixel of the input image (show to which cluster the pixel belongs)
+	:param w - width of the input image
+	:param h - height of the input image
+	
+'''
+
+
+def update_clusters(image_lab, cluster_centers, cluster_counts, labels, w, h):
+	for i in range(w):
+		for j in range(h):
+			cluster_id = labels[j, i]
+
+			if cluster_id != -1:
+				cluster_centers[cluster_id][0] += image_lab[j, i][0]
+				cluster_centers[cluster_id][1] += image_lab[j, i][1]
+				cluster_centers[cluster_id][2] += image_lab[j, i][2]
+				cluster_centers[cluster_id][3] += i
+				cluster_centers[cluster_id][4] += j
+
+				cluster_counts[cluster_id] += 1
+
+
+'''
+	Resetting the cluster (super pixel) values to 0s
+	
+	:param cluster_centers - values of [l, a, b, x, y] of clusters
+	:param cluster_counts - a matrix keeping the number of clusters for each
+'''
+
+
+def reset_clusters(cluster_centers, cluster_counts):
+	for i in range(len(cluster_centers)):
+		cluster_centers[i][0] = 0
+		cluster_centers[i][1] = 0
+		cluster_centers[i][2] = 0
+		cluster_centers[i][3] = 0
+		cluster_centers[i][4] = 0
+
+		cluster_counts[i] = 0
+
+
+'''
+	Normalizing the cluster (super pixel) values
+	
+	:param cluster_centers - values of [l, a, b, x, y] of clusters
+	:param cluster_counts - a matrix keeping the number of clusters for each
+'''
+
+
+def normalize_clusters(cluster_centers, cluster_counts):
+	# Normalizations
+	for i in range(len(cluster_centers)):
+		if cluster_counts[i] != 0:
+			cluster_centers[i][0] /= cluster_counts[i]
+			cluster_centers[i][1] /= cluster_counts[i]
+			cluster_centers[i][2] /= cluster_counts[i]
+			cluster_centers[i][3] /= cluster_counts[i]
+			cluster_centers[i][4] /= cluster_counts[i]
+
+
+'''
 	Initializing the super pixels
 	
 	:param image - the input image for being segmented (in LAB color space)
@@ -147,7 +244,7 @@ def init_super_pixels(image, S):
 			lab = image[y, x]
 			cluster_centers.append([*lab, x, y])
 
-	return np.asarray(cluster_centers)
+	return np.asarray(cluster_centers), np.zeros(len(cluster_centers))
 
 
 '''
