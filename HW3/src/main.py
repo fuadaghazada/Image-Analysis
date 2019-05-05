@@ -48,6 +48,10 @@ for i, image in enumerate(images):
 	# Gabor features and average gabors
 	result_images, average_gabors = gabor_feature_extractions(image, labels)
 
+	# Saving Gabor results
+	for img in result_images:
+		cv2.imwrite('../output/gabor/image' + str(i) + '_wavelen' + str(img['wavelength']) + "_orient" + str(img['orientation']) + '.png', img['image'])
+
 	all_feature_matrices.append(average_gabors.flatten())
 
 labels, centers = apply_k_means(np.asarray(all_feature_matrices), 9)
