@@ -72,6 +72,7 @@ def slic(image, k, m=10, num_iterations=10):
 		print("\t\t----")
 		print("\t\tNormalizing the values of computed clusters...")
 
+		# Normalizations
 		normalize_clusters(cluster_centers, cluster_counts)
 
 		print("\t\tValues of computed clusters have been normalized!")
