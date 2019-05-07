@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from skimage.segmentation import slic
 from skimage.segmentation import mark_boundaries
+from skimage.color import label2rgb
 
 from src.load_data import load_images
 from src.gabor_filter import gabor_feature_extractions
@@ -22,8 +23,9 @@ images, _ = load_images()
 image = images[1]
 
 # Parameters
-num_of_super_pixels = 1000
-compactness = 15
+num_of_super_pixels = 300
+num_of_clusters = 8
+compactness = 10
 
 # For keeping labels of each image in dataset
 images_labels = []
@@ -41,7 +43,8 @@ for i, image in enumerate(images):
 	plt.imsave('../output/slic/segmented' + str(i) + '.png', segmented_image)
 
 # For keeping all average Gabors
-all_feature_matrices = []
+all_data = None
+super_pixel_count = []
 
 # -- Part 2 --
 for i, image in enumerate(images):
@@ -52,14 +55,45 @@ for i, image in enumerate(images):
 	for img in result_images:
 		cv2.imwrite('../output/gabor/image' + str(i) + '_wavelen' + str(img['wavelength']) + "_orient" + str(img['orientation']) + '.png', img['image'])
 
-	all_feature_matrices.append(average_gabors.flatten())
+	# Concatenating average Gabors
+	if all_data is None:
+		all_data = average_gabors
+	else:
+		all_data = np.concatenate((all_data, average_gabors), axis=0)
 
-labels, centers = apply_k_means(np.asarray(all_feature_matrices), 9)
+	# Keeping super pixel counts
+	super_pixel_count.append(average_gabors.shape[0])
 
-centers = np.uint8(centers)
-res = centers[labels.flatten()]
-res2 = res.reshape(image.shape)
 
-cv2.imwrite('../output/clustering.png', res2)
+# -- Part 3 --
+
+# Applying the K-Means
+k_labels, k_centers = apply_k_means(np.float32(all_data), num_of_clusters)
+clusters = []
+
+# Getting the cluster matrices for each image
+for i, image in enumerate(images):
+	img_label = images_labels[i]
+	h, w = img_label.shape
+
+	cluster = np.zeros((h, w), dtype=np.uint8)
+	counter = 0
+
+	for ii in range(h):
+		for jj in range(w):
+			label = img_label[ii, jj]
+			cluster_id = k_labels[label + counter]
+			cluster[ii, jj] = cluster_id
+
+	clusters.append(cluster)
+	counter += super_pixel_count[i]
+
+# Saving the clusters
+for i, cluster in enumerate(clusters):
+	overlay_img = label2rgb(cluster, images[i], image_alpha=0)
+	plt.imsave('../output/cluster/cluster' + str(i) + '.png', overlay_img)
+
+
+
 
 
