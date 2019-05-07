@@ -22,10 +22,13 @@ from src.clustering import apply_k_means
 images, _ = load_images()
 image = images[1]
 
-# Parameters
+# ------- Parameters --------
 num_of_super_pixels = 300
-num_of_clusters = 8
-compactness = 10
+num_of_clusters = 2
+compactness = 5
+wavelengths = [2, 4, 6, 8]
+orientations = [30, 50, 70, 90]
+# ---------------------------
 
 # For keeping labels of each image in dataset
 images_labels = []
@@ -49,7 +52,7 @@ super_pixel_count = []
 # -- Part 2 --
 for i, image in enumerate(images):
 	# Gabor features and average gabors
-	result_images, average_gabors = gabor_feature_extractions(image, labels)
+	result_images, average_gabors = gabor_feature_extractions(image, labels, wavelengths, orientations)
 
 	# Saving Gabor results
 	for img in result_images:
@@ -68,25 +71,7 @@ for i, image in enumerate(images):
 # -- Part 3 --
 
 # Applying the K-Means
-k_labels, k_centers = apply_k_means(np.float32(all_data), num_of_clusters)
-clusters = []
-
-# Getting the cluster matrices for each image
-for i, image in enumerate(images):
-	img_label = images_labels[i]
-	h, w = img_label.shape
-
-	cluster = np.zeros((h, w), dtype=np.uint8)
-	counter = 0
-
-	for ii in range(h):
-		for jj in range(w):
-			label = img_label[ii, jj]
-			cluster_id = k_labels[label + counter]
-			cluster[ii, jj] = cluster_id
-
-	clusters.append(cluster)
-	counter += super_pixel_count[i]
+clusters = apply_k_means(np.float32(all_data), num_of_clusters, images, images_labels, super_pixel_count)
 
 # Saving the clusters
 for i, cluster in enumerate(clusters):

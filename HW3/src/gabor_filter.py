@@ -25,15 +25,9 @@ import numpy as np
 '''
 
 
-def gabor_feature_extractions(image, labels):
+def gabor_feature_extractions(image, labels, wavelengths, orientations):
 	# Converting the input image to gray scale
 	gray_scale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-	# Orientation parameters
-	orientations = [30, 50, 70, 90]
-
-	# Wavelength parameters
-	wavelengths = [2, 4, 6, 8]
 
 	# Kernel parameters
 	kernel_size = 31
